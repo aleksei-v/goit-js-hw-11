@@ -4,6 +4,13 @@ import refs from './refs';
 import fetchImages from './api-servise';
 import clearImageGallery from './clear-image-gallery';
 
+refs = {
+    imageGallery: document.querySelector('.gallery'),
+    searchInput: document.querySelector('input'),
+    form: document.querySelector('.search-form'),
+    loadMoreBtn: document.querySelector('.load-more')
+}
+
 let value = null;
 let step = 1;
 
