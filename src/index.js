@@ -1,6 +1,5 @@
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import renderMarkupImage from './render-markup'
-import refs from './refs';
 import fetchImages from './api-servise';
 import clearImageGallery from './clear-image-gallery';
 
