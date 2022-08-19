@@ -1,7 +1,6 @@
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import renderMarkupImage from './render-markup'
 import fetchImages from './api-servise';
-import clearImageGallery from './clear-image-gallery';
 
 const refs = {
     imageGallery: document.querySelector('.gallery'),
@@ -77,6 +76,11 @@ function checkPhotoAmount(response) {
     } else {
         refs.loadMoreBtn.classList.add('is-hidden')
     }
+}
+
+function clearImageGallery() {
+    refs.imageGallery.innerHTML = '';
+    refs.loadMoreBtn.classList.add('is-hidden')
 }
 
 
