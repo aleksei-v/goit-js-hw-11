@@ -1,58 +1,53 @@
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
-import SimpleLightbox from "simplelightbox";
+import renderMarkupImage from './render-markup'
+import refs from './refs';
+import fetchImages from './api-servise';
+import clearImageGallery from './clear-image-gallery';
 
-import "simplelightbox/dist/simple-lightbox.min.css";
-const BASE_URL = 'https://pixabay.com/api/';
-const API_KEY = '29344845-320c81c87bec30b6c30cddfd7';
-const axios = require('axios');
-let page = 1;
+let value = null;
+let step = 1;
 
-const refs = {
-    searchButton: document.querySelector('.submit-button'),
-    imageGallery: document.querySelector('.gallery'),
-    searchInput: document.querySelector('input'),
-    form: document.querySelector('.search-form'),
-}
-async function fetchImages(name) {
-    try {
-    const url = `${BASE_URL}?key=${API_KEY}&q=${name}`;
-    const images = await axios.get(url, {
-        params: {
-        per_page: 40,
-        page,
-        image_type: 'photo',
-        orientation: 'horizontal',
-        safesearch: true,
-    }})
-    return images;
-    }
-    catch {
-        throw new Error(response.status);
-    }
-}
-
+refs.loadMoreBtn.classList.add('is-hidden');
 
 const searchPhotoByName = (evt) => {
     evt.preventDefault();
-    const inputName = refs.searchInput.value;
- 
-        
-    fetchImages(inputName)
+    value = evt.target.searchQuery.value;
+    step = 1;
+    clearImageGallery();
+    fetchImages(value, step)
         .then(showImageGallery)
-        .catch(() => {
-            Notify.failure('Sorry, there are no images matching your search query. Please try again.');
-        });
-    page += 1;
-
-
+        .catch(error => console.log(error));
 }
-  
+
+function onLoadMore() {
+    step += 1
+    fetchImages(value, step)
+        .then(data => onClickLoadMore(data, step))
+        .catch(error => console.log(error));
+}
+
+
 
 refs.form.addEventListener('submit', searchPhotoByName);
+refs.loadMoreBtn.addEventListener('click', onLoadMore)
+
+
+function onClickLoadMore(response, step) {
+    const countTotalPhoto = response.data.totalHits;
+    const allImage = response.data.hits;
+    const totalPages = countTotalPhoto / 40;
+    console.log(step > totalPages);
+    
+    if (step > totalPages) {
+        refs.loadMoreBtn.classList.add('is-hidden');
+        Notify.info("We're sorry, but you've reached the end of search results.");
+    };
+    renderMarkupImage(allImage);
+}
 
 function showImageGallery(images) {
-        const totalHits = images.data.totalHits
-
+    const totalHits = images.data.totalHits
+   
     if (images.data.hits.length === 0) {
            Notify.failure('Sorry, there are no images matching your search query. Please try again.');
            clearImageGallery();
@@ -62,56 +57,20 @@ function showImageGallery(images) {
         clearImageGallery(images.data.hits)
         return;
     } else {
-        Notify.success(`Hooray! We found ${totalHits} images.`)
+        Notify.success(`Hooray! We found ${totalHits} images.`);
+        checkPhotoAmount(images)
         renderMarkupImage(images.data.hits)
     }
-    
-}
-function renderMarkupImage(images) {
-    const markup = images
-        .map(
-            ({
-                webformatURL,
-                largeImageURL,
-                tags,
-                likes,
-                views,
-                comments,
-                downloads
-            }) => `<div class="photo-card">
-                    <a class="info-item__link" href="${largeImageURL}">
-                    <img src="${webformatURL}" alt="${tags}" loading="lazy" width="500px" height="400px"/>
-                    </a>
-                    <div class="info">
-                        <p class="info-item">
-                        <b>Likes ${likes}</b>
-                        </p>
-                        <p class="info-item">
-                        <b>Views ${views}</b>
-                        </p>
-                        <p class="info-item">
-                        <b>Comments ${comments}</b>
-                        </p>
-                        <p class="info-item">
-                        <b>Downloads ${downloads}</b>
-                        </p>
-                    </div>
-                    </div>`
-            
-        )
-        .join('');
-
-    refs.imageGallery.innerHTML = markup;
-
-    const lightbox =  new SimpleLightbox('.gallery a', {
-        captionDelay: 250,
-        captionsData: 'alt',
-        captionPosition: "top",
-    });
-    lightbox.refresh();
 }
 
-function clearImageGallery() {
-    refs.imageGallery.innerHTML = '';
+function checkPhotoAmount(response) {
+    const photoPerPage = 40;
+    const dataTotalHits = response.data.totalHits;
+    if (dataTotalHits > photoPerPage) {
+        refs.loadMoreBtn.classList.remove('is-hidden')
+    } else {
+        refs.loadMoreBtn.classList.add('is-hidden')
+    }
 }
+
 
