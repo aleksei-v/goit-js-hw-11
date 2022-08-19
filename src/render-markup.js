@@ -1,5 +1,7 @@
 import "simplelightbox/dist/simple-lightbox.min.css";
 import SimpleLightbox from "simplelightbox";
+import getRefs from './get-refs';
+const refs = getRefs();
 export default function renderMarkupImage(images) {
     const markup = images
         .map(

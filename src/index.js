@@ -1,13 +1,8 @@
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import renderMarkupImage from './render-markup'
 import fetchImages from './api-servise';
-
-const refs = {
-    imageGallery: document.querySelector('.gallery'),
-    searchInput: document.querySelector('input'),
-    form: document.querySelector('.search-form'),
-    loadMoreBtn: document.querySelector('.load-more')
-}
+import getRefs from './get-refs';
+const refs = getRefs();
 
 let value = null;
 let step = 1;
